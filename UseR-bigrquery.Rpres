@@ -263,12 +263,12 @@ tab %>%
 ¡Gracias!
 ========================================================
 
-```{r, echo = F, out.height="600px"}
+```{r, echo = F, out.height="400px"}
 knitr::include_graphics("img/thankyou-grumpycat.jpg")
 ```
 
 
-### Material, código y presentación
+### Material, código y presentación:
 
 Github: https://github.com/Songeo/usuariosr_aplicacion_bigrquery.git
 

@@ -307,10 +307,10 @@ tab %>%
 ¡Gracias!
 ========================================================
 
-<img src="img/thankyou-grumpycat.jpg" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" height="600px" style="display: block; margin: auto;" />
+<img src="img/thankyou-grumpycat.jpg" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" height="400px" style="display: block; margin: auto;" />
 
 
-### Material, código y presentación
+### Material, código y presentación:
 
 Github: https://github.com/Songeo/usuariosr_aplicacion_bigrquery.git
 

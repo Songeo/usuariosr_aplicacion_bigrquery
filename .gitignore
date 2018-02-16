@@ -1,4 +1,4 @@
 .httr-oauth
-.RProj
+*.RProj
 .Rhistory
 .Rproj.user/
