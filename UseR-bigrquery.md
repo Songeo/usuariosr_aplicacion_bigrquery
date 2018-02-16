@@ -17,8 +17,9 @@ font-family: 'Helvetica'
 
 Sonia Mendizábal
 
-<img src="img/logo-CAD.png" style="background-color:transparent; border:0px; box-shadow:none;" width="280"></img>
+<img src="img/logo-CAD.png" style="background-color:transparent; border:0px; box-shadow:none;" width="300"></img>
 
+<img src="img/logo-rladies.png" style="background-color:transparent; border:0px; box-shadow:none;" width="250"></img>
 
 
 Introducción
