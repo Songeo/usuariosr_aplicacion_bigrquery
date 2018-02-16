@@ -73,7 +73,7 @@ Google BigQuery
 
 - ¿Cómo se accede?
 
-> Existe una interfaz de usuario web, la línea de comandos o haciendo llamdas a la API.
+> Existe una interfaz de usuario web, la línea de comandos o haciendo llamadas a la API.
 
 
 
@@ -293,7 +293,8 @@ tab %>%
   scale_fill_manual(values = col.gradient.cut) + 
   ylab("Porcentaje (%)") + xlab("Edad de la madre") +
   guides(fill = guide_legend("Edad del\npadre")) +
-  ggtitle("Proporción de nacimientos por edad de la madre\ndado edad de la madre") +
+  ggtitle("Proporción de nacimientos por edad de la madre\ndado edad de la madre", 
+          "Preliminar") +
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 90)) 
 ```
@@ -309,6 +310,11 @@ tab %>%
 <img src="img/thankyou-grumpycat.jpg" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" height="600px" style="display: block; margin: auto;" />
 
 
+### Material, código y presentación
+
+Github: https://github.com/Songeo/usuariosr_aplicacion_bigrquery.git
+
+
 ### Referencias:
 
 - BigQuery: https://cloud.google.com/bigquery/?hl=es
@@ -316,6 +322,7 @@ tab %>%
 - `bigrquery`: https://cran.r-project.org/web/packages/bigrquery/index.html
 
 - Estadísticas de natalidad: http://www.beta.inegi.org.mx/proyectos/registros/vitales/natalidad/
+
 
 
 ### Contacto:
