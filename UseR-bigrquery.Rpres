@@ -1,0 +1,283 @@
+
+
+Una aplicación de bigrquery 
+========================================================
+width: 1440
+height: 1200
+font-family: 'Helvetica'
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+library(knitr)
+```
+
+16 de febrero de 2018
+
+## Encuentro de usuarios de R 2018
+
+
+Sonia Mendizábal
+
+<img src="img/logo-CAD.png" style="background-color:transparent; border:0px; box-shadow:none;" width="280"></img>
+
+
+
+Introducción
+========================================================
+
+**Objetivo:** Obtener la proporción de nacimientos por edad de la madre dado la edad del padre de 2010 a 2016. 
+
+<img src="img/logo-IPASsmall.png" style="background-color:transparent; border:0px; box-shadow:none; margin:0px auto;display:block" width="200"></img>
+
+**Datos:** Estadísticas de nacimientos de 2010 a 2016. INEGI.
+
+<img src="img/logo-hINEGI.png" style="background-color:transparent; border:0px; box-shadow:none; margin:0px auto;display:block" width="300"></img>
+
+
+**Problema:** Cada tabla tiene más de dos millones de renglones, aproximadamente 14,000,000 observaciones. 
+
+- R solo si tienes muchas paciencia.
+- Varias personas en el equipo con diferentes tareas. 
+
+**Herramientas:** Google BigQuery, R y `bigrquery`.
+
+
+
+
+
+
+
+
+
+========================================================
+
+```{r, echo=FALSE, out.height="500px"}
+knitr::include_graphics("img/bigquery-logo.png")
+```
+
+# 1. Google BigQuery.
+
+
+
+
+
+Google BigQuery
+========================================================
+
+- ¿Qué es?
+
+> Almacén de datos (*data warehouse*) empresariales rápido, económico y totalmente administrado para analizar datos a gran escala.
+
+- ¿Qué hace?
+
+    > - Permite realizar consultas SQL **muy** rápidas. 
+    > - Utiliza la capacidad de procesamiento de la infraestructura de Google. 
+    > - Escanea terabytes en cuestión de segundos y petabytes en cuestión de minutos.
+
+- ¿Cómo se accede?
+
+> Existe una interfaz de usuario web, la línea de comandos o haciendo llamdas a la API.
+
+
+
+```{r, echo=FALSE, out.height="300px"}
+knitr::include_graphics("img/data-warehouse.png")
+```
+
+
+
+
+¿Cómo lo usamos?
+========================================================
+
+
+```{r, echo=FALSE}
+knitr::include_graphics("img/bigquery_input.png")
+```
+
+<small>Puedes cargar los datos desde Google Cloud Storage o Google Cloud Datastore o   transmitirlos a BigQuery para permitir analizarlos en tiempo real.</small>
+
+
+```{r, echo=FALSE, out.height="650px"}
+knitr::include_graphics("img/bigquery_window.png")
+```
+
+
+
+
+========================================================
+
+```{r, echo=FALSE, out.height="500px"}
+knitr::include_graphics("img/R_logo.png")
+```
+
+# 2. bigrquery 
+
+
+> Proporciona una interfaz en R para Google BigQuery.
+
+
+Por ejemplo:
+========================================================
+
+a) Llamamos la librería:
+
+```{r}
+library(bigrquery)
+```
+
+b) Definir el id del proyecto (*Project ID*):
+
+```{r, echo=FALSE}
+knitr::include_graphics("img/bigrquery_projects.png")
+```
+
+```{r}
+# Proyecto ----
+project <- "acoustic-field-186719" # put your project ID here
+```
+
+c) Hacemos una consulta:
+```{r}
+query_exec(query = "SELECT  filenom, ANO_REG, EDAD_MADN, EDAD_PADN FROM [acoustic-field-186719:nacimientos.nacim2016] LIMIT 4", 
+           project = project)
+```
+
+
+
+========================================================
+```{r, echo=FALSE, out.height="500px"}
+knitr::include_graphics("img/birth-icon.png")
+```
+
+# 3. Aplicación
+
+
+> **Objetivo:** Obtener la proporción de nacimientos por edad de la madre dado la edad del padre de 2010 a 2016. 
+
+> **Datos:** Estadísticas de nacimientos de 2010 a 2016. INEGI.
+
+
+
+Número de nacimientos por edad del padre y madre de 2010 a 2016. 
+========================================================
+
+```{r, eval = T, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(forcats)
+```
+
+```{r, eval = T}
+query_nacims <- lapply(2010:2016, function(year.nom){
+  # print(year.nom)
+  sql <- paste0("SELECT  COUNT(filenom), ANO_REG, EDAD_MADN", 
+                ", EDAD_PADN FROM [acoustic-field-186719:nacimientos.nacim", 
+                year.nom,
+                "] group by ANO_REG, EDAD_MADN, EDAD_PADN")
+  tt <- query_exec(sql, project = project)
+  }) 
+```
+
+```{r}
+query_nacims[[1]] %>% head
+```
+
+```{r}
+query_nacims %>% length()
+```
+
+
+
+Ir a script
+========================================================
+```{r, echo=FALSE, out.height="500px"}
+knitr::include_graphics("img/flypig.jpg")
+```
+
+
+
+Un poco de manipulación
+========================================================
+```{r, eval = T}
+df_nacims <- query_nacims %>% 
+  bind_rows() %>% 
+  as.tibble() %>% 
+  rename(count = f0_, ANIO_REG = ANO_REG)  %>% 
+  mutate(EDAD_MADN = ifelse(EDAD_MADN == 99, NA, EDAD_MADN),
+         EDAD_PADN = ifelse(EDAD_PADN == 99, NA, EDAD_PADN),
+         edad_gpo_madre = cut(ifelse(EDAD_MADN == 99, NA, EDAD_MADN), 
+                              right = F,
+                              breaks = seq(10, 100, by = 2), 
+                              include.lowest = T),
+         edad_gpo_padre = cut(ifelse(EDAD_PADN == 99, NA, EDAD_PADN), 
+                              right = F,
+                              breaks = seq(12, 80, by = 5), 
+                              include.lowest = T), 
+         edad_gpo_madre = fct_explicit_na(edad_gpo_madre, na_level = "(No registrado)"),
+         edad_gpo_padre = fct_explicit_na(edad_gpo_padre, na_level = "(No registrado)")) 
+df_nacims %>% head
+```
+
+
+
+Contamos
+========================================================
+```{r, eval = T}
+tab <- df_nacims %>% 
+  filter(EDAD_MADN < 50) %>%
+  group_by(edad_gpo_madre, edad_gpo_padre) %>% 
+  summarise(n_acum = sum(count)) %>% 
+  group_by(edad_gpo_madre) %>% 
+  mutate( prop = 100*n_acum/sum(n_acum)) %>% 
+  ungroup
+tab %>% head(10)
+```
+
+```{r}
+col.gradient.cut <- c(colorRampPalette(c("#9999ff", "yellow", "#E67400"))(13), 
+                      "gray50")
+```
+
+
+
+Gráfica final
+========================================================
+```{r, fig.width=8, fig.height=4.5, dpi=300, out.width="1460px", out.height="760px"}
+tab %>% 
+  ggplot(aes(x = edad_gpo_madre, y = prop, fill= edad_gpo_padre)) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_manual(values = col.gradient.cut) + 
+  ylab("Porcentaje (%)") + xlab("Edad de la madre") +
+  guides(fill = guide_legend("Edad del\npadre")) +
+  ggtitle("Proporción de nacimientos por edad de la madre\ndado edad de la madre") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90)) 
+```
+
+
+
+
+¡Gracias!
+========================================================
+
+```{r, echo = F, out.height="600px"}
+knitr::include_graphics("img/thankyou-grumpycat.jpg")
+```
+
+
+### Referencias:
+
+- BigQuery: https://cloud.google.com/bigquery/?hl=es
+
+- `bigrquery`: https://cran.r-project.org/web/packages/bigrquery/index.html
+
+- Estadísticas de natalidad: http://www.beta.inegi.org.mx/proyectos/registros/vitales/natalidad/
+
+
+### Contacto:
+
+github: [Songeo](https://github.com/Songeo)
+
+email: sonia.gmcl@gmail.com
